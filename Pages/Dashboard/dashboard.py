@@ -12,7 +12,7 @@ async def dashboard(area, user_id, name):
     games = p.get("games","N/A") or "0"
     likes = p.get("likes", "N/A") or "0"
     plays = p.get("plays", "N/A") or "0"
-    if games.isdigit() and int(games):
+    if games not in ['N/A', '0']:
         latest = await getGames(user_id)
         gamess = await getGraph(user_id)
     else:

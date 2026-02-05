@@ -1,2 +1,101 @@
-async def create(*args, **kwargs):
-    pass
+from UI import Card, Input, Label, Col, RawCol, RawRow, AddSpace, CheckBox, Notify, Button, navigate, Password
+from MODELS import Variable
+from Database.auth import signup
+
+def validate(nv, mv, pv, cv, ne, me, pe):
+    ne.value = ""
+    me.value = ""
+    pe.value = ""
+    name = nv.value.strip().lower()
+    mail = mv.value.strip().lower()
+    pswd = pv.value.strip()
+    cnfm = cv.value.strip()
+    has_error = False
+    if not name:
+        ne.value = "Username is required!"
+        has_error = True
+    if not mail:
+        me.value = "Mail is required!"
+        has_error = True
+    if not pswd:
+        pe.value = "Password is required!"
+        has_error = True
+    if has_error:
+        return False
+    if not cnfm:
+        pe.value = "Confirm is required!"
+        return False
+    if pswd != cnfm:
+        pe.value = "Passwords do not match!"
+        return False
+    return True
+
+async def sup(nv, mv, pv, cv, ne, me, pe, l, response):
+    if not validate(nv, mv, pv, cv, ne, me, pe):
+        return
+    name = nv.value.strip().lower()
+    mail = mv.value.strip().lower()
+    pswd = pv.value.strip()
+    res = await signup(name, mail, pswd)
+    if not res.success:
+        if 'name' in res.errors:
+            ne.value = res.errors['name']
+        if 'mail' in res.errors:
+            me.value = res.errors['mail']
+        if 'pswd' in res.errors:
+            pe.value = res.errors['pswd']
+        if 'other' in res.errors:
+            Notify(res.errors.get("other", "An unknown error occured!"), type='negative')
+        return
+    res.data['auth'] = True
+    if res.data.get("id") is None:
+        return Notify("Error in creating account!", type="negative")
+    id = int(res.data.get("id",0))
+    navigate(f"/set-cookie/{id}?redirectTo={l}")
+
+async def create(l='/dashboard', response=None):
+    nv = Variable("")
+    mv = Variable("")
+    pv = Variable("")
+    cv = Variable("")
+    ne = Variable("")
+    me = Variable("")
+    pe = Variable("")
+    widgets = []
+    async def sp():
+        for i in widgets:
+            i.set_enabled(False)
+        try: await sup(nv, mv, pv, cv, ne, me, pe, l, response)
+        finally:
+            for i in widgets:
+                i.set_enabled(True)
+    with Col().classes("w-full h-full justify-center items-center"):
+        with Card().classes("w-full sm:w-[90vw] md:w-[50vw] lg:w-[30vw] h-fit"):
+            Label("SignUp").classes("text-lg border-b-2 w-full font-bold text-center")
+            with RawCol().classes("w-full h-full gap-2"):
+                with RawRow().classes("w-full justify-center text-sm"):
+                    Label("Display Name *").classes("w-fit")
+                    AddSpace()
+                    Label(model=ne, model_configs=dict(strict=False)).classes("w-fit")\
+                        .bind_visibility_from(ne, "value")
+                widgets.append(Input(nv).classes("w-full"))
+                with RawRow().classes("w-full justify-center text-sm"):
+                    Label("Email *").classes("w-fit")
+                    AddSpace()
+                    Label(model=me, model_configs=dict(strict=False)).classes("w-fit")\
+                        .bind_visibility_from(me, "value")
+                widgets.append(Input(mv).classes("w-full"))
+                with RawRow().classes("w-full justify-center text-sm"):
+                    Label("Password *").classes("w-fit")
+                    AddSpace()
+                    Label(model=pe, model_configs=dict(strict=False)).classes("w-fit")\
+                        .bind_visibility_from(pe, "value")
+                widgets.append(Password(model=pv).classes("w-full"))
+                widgets.append(Password(model=cv).classes("w-full"))
+                checkbox = CheckBox("I accept agreements!").classes("w-full")
+                widgets.append(checkbox)
+                btn = Button("Create Account", on_click=sp)
+                btn.bind_enabled_from(checkbox, "value").classes("w-full")
+                btn2 = Button("LogIn", link=f"/login?redirectTo={l}")
+                widgets.append(btn2)
+                widgets.append(btn)

@@ -30,8 +30,6 @@ async def signup(
     mail = escapeSQL(mail.strip().lower())
     pswd = escapeSQL(pswd)
     res = Response()
-
-    # --- validations (FIXED: pass correct variables) ---
     if not verifyUsername(name): res.errors['name'] = "Username can only contain letters and numbers."
     if not verifyMail(mail): res.errors['mail'] = "Invalid mail."
     if not verifyPswd(pswd): res.errors['pswd'] = "Password is not strong."
@@ -49,7 +47,7 @@ async def signup(
             print("Succeeded")
         res.data = await insert_user(name, mail, pswd, avatar)
     except Exception as e:
-        res.errors['other'] = "Cannot create account!"
+        res.errors['other'] = "Cannot create account!" + f'\n{e}'
         print(e)
         return res
     print(res.data)

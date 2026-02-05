@@ -1,6 +1,7 @@
 from ENV import ui
 from typing import Callable, Literal
-
+def INIT_THEME():
+    return ui.dark_mode(False)
 def navigate(link:str,new_tab:bool=False):ui.navigate.to(link,new_tab)
 def Label(text="", model=None, model_configs=None):
     lbl = ui.label(text)
@@ -17,7 +18,7 @@ def RawRow(): return ui.element().classes("flex flex-row")
 def Center(): return ui.element( ).classes("flex justify-center items-center" )
 def Footer(config: dict|None = None): return ui.footer(**(config or {}))
 def Card(align: Literal['start', 'end', 'center', 'baseline', 'stretch']|None = None ):
-    return ui.card(align_items=align).classes("bg-card-l dark:bg-card-d")
+    return ui.card(align_items=align)
 def Link(
         text: str = "",
         link: str = "",
@@ -41,11 +42,12 @@ def Input(
     elif type == 'number': inp = ui.number(**kwargs)
     else: inp = ui.input().props(f'type="{type}"')
     if inp:
-        inp.classes("bg-inp rounded-sm")
-        inp.props('input-class="text-text-secondary"')
+        inp.classes("rounded-sm")
         inp.props("dense outlined"*bool(default_props) + ' ')
         if model: inp.bind_value(model, 'value', **bindings)
     return inp
+def Password(password_toggle_button=True, **kwargs):
+    return Input(**kwargs, password=True, password_toggle_button=password_toggle_button)
 def Select(
         model = None,
         options: list|dict|None = None,
@@ -57,17 +59,17 @@ def Select(
     slc = ui.select(options=options or [], **kwargs)
     slc.props("dense outlined"*bool(default_props) + ' ')
     if model: slc.bind_value(model, 'value', **bindings)
-    slc.classes("bg-inp rounded-sm").props('input-class="text-text-secondary"')
+    slc.classes("rounded-sm")
     return slc
 def Button(
-        text: str = "", 
+        text: str = "",
         on_click = lambda: (),
         link="",
         new_tab=False,
         config: dict|None = None
     ):
     if not config: config = {}
-    btn = ui.button(text=text, on_click=on_click, **config).props("unelevated push").classes("bg-btn-l dark:bg-btn-d")
+    btn = ui.button(text=text, on_click=on_click, **config)
     if link:
         btn.props(f'href="{link}"')
     if new_tab:
@@ -97,7 +99,7 @@ def TextArea(
     if autogrow: ta.props('autogrow')
     ta.classes(inner_classes)
     ta.props('dense outlined')
-    ta.classes("bg-inp rounded-sm").props(f'input-class="{inp_cls}" input-props="{inp_prp}" input-style="{inp_sty}"')
+    ta.classes("rounded-sm").props(f'input-class="{inp_cls}" input-props="{inp_prp}" input-style="{inp_sty}"')
     return ta
 def CheckBox(
         text:str = "",
@@ -153,7 +155,7 @@ def navBar(links:dict|None = None, bkp="sm"):
                     Button(name, link=opts)
         with Button(config=dict(icon="menu")).classes(f"flex {bkp}:hidden") as mobile:
             with ui.menu().props("auto-close"):
-                with RawCol().classes("w-fit gap-1 p-1 bg-secondary"):
+                with RawCol().classes("w-fit gap-1 p-1"):
                     for name,opts in (links or {}).items():
                         if isinstance(opts, (dict)):
                             condition = opts.pop("cond", True)

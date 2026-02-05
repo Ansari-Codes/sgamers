@@ -1,0 +1,93 @@
+CREATE_USERS_TABLE = """
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    pswd TEXT NOT NULL,
+    avatar TEXT,
+    role TEXT DEFAULT 'user',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+"""
+
+CREATE_SESSIONS_TABLE = """
+CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user INTEGER NOT NULL,
+    session_token TEXT UNIQUE NOT NULL,
+    expires_at INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user) REFERENCES users(id)
+);
+"""
+
+CREATE_PROJECTS_TABLE = """
+CREATE TABLE IF NOT EXISTS games (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    owner INTEGER NOT NULL,
+    description TEXT,
+    url TEXT,
+    likes INTEGER DEFAULT 0,
+    plays INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(owner) REFERENCES users(id)
+);
+"""
+
+CREATE_COMMENTS_TABLE = """
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    content TEXT NOT NULL,
+    commentor INTEGER NOT NULL,
+    game INTEGER NOT NULL,
+    reply_to INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(commentor) REFERENCES users(id),
+    FOREIGN KEY(game) REFERENCES games(id),
+    FOREIGN KEY(reply_to) REFERENCES comments(id)
+);
+"""
+
+CREATE_LIKES_TABLE = """
+CREATE TABLE IF NOT EXISTS likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game INTEGER NOT NULL,
+    liker INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(game) REFERENCES games(id),
+    FOREIGN KEY(liker) REFERENCES users(id)
+);
+"""
+
+CREATE_PLAYS_TABLE = """
+CREATE TABLE IF NOT EXISTS plays (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game INTEGER NOT NULL,
+    player INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(game) REFERENCES games(id),
+    FOREIGN KEY(player) REFERENCES users(id)
+);
+"""
+
+CREATE = [CREATE_COMMENTS_TABLE, CREATE_LIKES_TABLE, CREATE_PLAYS_TABLE, CREATE_PROJECTS_TABLE, CREATE_SESSIONS_TABLE, CREATE_USERS_TABLE]
+
+from DB import SQL
+
+async def CreateTables():
+    for c in CREATE:
+        response = await SQL(c)
+        print(response)
+    print()
+    print("cli.py: created all table")
+
+print("cli.py: Creating tables")
+import asyncio
+asyncio.run(CreateTables())
+print("cli.py: Database initialized!")

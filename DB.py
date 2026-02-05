@@ -8,7 +8,9 @@ SESSIONS = "sessions"
 GAMES = "games"
 COMMENTS = "comments"
 LIKES = "likes"
-VIEWS = "views"
+PLAYS = "plays"
+
+tables = [USERS, SESSIONS, GAMES, COMMENTS, LIKES, PLAYS]
 name = "games"
 
 async def SQL(query: str, to_fetch: bool = False):
@@ -37,15 +39,11 @@ async def CLEAR():
 async def DROP():
     print("cli.py: Dropping tables...")
     drop = '\n'.join([
-        "DROP TABLE IF EXISTS comments;",
-        "DROP TABLE IF EXISTS games;",
-        "DROP TABLE IF EXISTS users;",
-        "DROP TABLE IF EXISTS sessions;",
-        "DROP TABLE IF EXISTS likes;",
-        "DROP TABLE IF EXISTS views;",
+        f"DROP TABLE IF EXISTS {t};" for t in tables
     ])
     await SQL(drop)
     print("cli.py: All tables dropped successfully!")
 
-# import asyncio
-# asyncio.run(DROP())
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(DROP())

@@ -1,5 +1,6 @@
 import httpx
 from ENV import API_URL,PASSWORD
+import time
 
 q = 0
 
@@ -12,20 +13,21 @@ PLAYS = "plays"
 
 tables = [USERS, SESSIONS, GAMES, COMMENTS, LIKES, PLAYS]
 name = "games"
+client = httpx.AsyncClient(timeout=10, http2=True)
 
 async def SQL(query: str, to_fetch: bool = False):
     global q
     payload = {"query": query, "to_fetch": to_fetch, "name": name, "password":PASSWORD, "purpose":"db"}
     q += 1
     print(f"DB: {q}: Running\n\t", query)
+    start = time.perf_counter()
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.post(API_URL, json=payload)
-            response.raise_for_status()
-            res = response.json()
-            if res.get("success"): return res.get("data", None)
-            else: raise Exception(res.get("error"))
-    finally: print(f"DB: {q}: Query ran!")
+        response = await client.post(API_URL, json=payload)
+        response.raise_for_status()
+        res = response.json()
+        if res.get("success"): return res.get("data", None)
+        else: raise Exception(res.get("error"))
+    finally: print(f"DB: {q}: Query ran! took {time.perf_counter() - start} seconds...!")
 
 async def CLEAR():
     tables = await SQL("""

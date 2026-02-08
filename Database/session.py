@@ -4,7 +4,7 @@ from MODELS import Response
 async def getCurrentUser(token):
     res = Response()
     if not token:
-        res.errors["ad"] = "as"
+        res.errors["token"] = "No token provided!"
         return res
     try:
         session = await SQL(f"SELECT * FROM {SESSIONS} WHERE session_token='{token}';", to_fetch=True)
@@ -17,8 +17,8 @@ async def getCurrentUser(token):
             res.data = user[0] if user else {}
             return res
         else:
-            res.errors['session'] = "Cannot find session!"
+            res.errors['session'] = "Cannot find the session!"
             return res
     except Exception as e:
-        res.errors["other"] = str(e)
+        res.errors["Error"] = str(e)
         return res

@@ -5,6 +5,6 @@ ENV.ui.run(
     title=ENV.NAME, 
     favicon=ENV.ICON, 
     storage_secret=ENV.SECRET,
-    on_air=True,
+    # on_air=True,
     reload=ENV.RELOAD
 )

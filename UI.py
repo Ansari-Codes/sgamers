@@ -1,7 +1,10 @@
 from ENV import ui
 from typing import Callable, Literal
 def INIT_THEME():
-    return ui.dark_mode(False)
+    return ui.dark_mode(None)
+def delete(elem): 
+    if not elem.is_deleted: elem.delete()
+def Image(src): return ui.image(src)
 def navigate(link:str,new_tab:bool=False):ui.navigate.to(link,new_tab)
 def Label(text="", model=None, model_configs=None):
     lbl = ui.label(text)

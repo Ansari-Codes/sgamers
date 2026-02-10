@@ -12,7 +12,7 @@ if not (API_URL or PASSWORD):
 
 RELOAD = True
 HOST = '0.0.0.0'
-PORT = int(os.environ.get("PORT", 9000))
+PORT = int(os.environ.get("PORT", 8080))
 SECRET = os.getenv("SECRET", "my-very=very!secret~token@though$you&can(*read::;")
 client = TestClient(app, f"http://localhost:{PORT}")
 

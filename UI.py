@@ -78,6 +78,23 @@ def Button(
     if new_tab:
         btn.props(f'target="_blank"')
     return btn
+def IconBtn(
+        icon:str="",
+        on_click = lambda: (),
+        link="",
+        new_tab=False,
+        config:dict|None=None,
+        icon_config:dict|None=None
+    ):
+    if not config: config = {}
+    if not icon_config: icon_config = {}
+    btn = ui.button(icon=icon, on_click=on_click, **config)
+    if link:
+        btn.props(f'href="{link}"')
+    if new_tab:
+        btn.props(f'target="_blank"')
+    btn.props("dense").classes("p-2")
+    return btn
 def TextArea(
         content: str = "",
         model=None,

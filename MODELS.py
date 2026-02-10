@@ -31,6 +31,9 @@ class Variable:
         self.value = value
     def set(self, value):
         self.value  = value
+        self.on_set()
         return self.value
     def get(self):
         return self.value
+    def on_set(self, func=lambda x:(), *, alterer=lambda x:x):
+        func(alterer(self.value))

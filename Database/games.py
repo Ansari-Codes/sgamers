@@ -63,3 +63,27 @@ async def getGames(
         res.errors["error"] = str(e)
 
     return res
+
+async def addGame(
+    owner: int,
+    title: str,
+    description: str,
+    url: str,
+    img_url: str
+):
+    res = Response()
+
+    esc_title = escapeSQL(title)
+    esc_desc = escapeSQL(description)
+    esc_url = escapeSQL(url)
+    esc_img = escapeSQL(img_url)
+
+    query = f"""
+        INSERT INTO games (owner, title, description, url, img_url)
+        VALUES ({owner}, '{esc_title}', '{esc_desc}', '{esc_url}', '{esc_img}');
+    """
+
+    try:await SQL(query)
+    except Exception as e:
+        res.errors["error"] = str(e)
+    return res
